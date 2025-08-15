@@ -1,0 +1,23 @@
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+export default async function DebugPage() {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll() {}, // no-op for server component
+      },
+    }
+  );
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+  return (
+    <pre style={{ padding: 16 }}>
+      {JSON.stringify({ user, error }, null, 2)}
+    </pre>
+  );
+}
